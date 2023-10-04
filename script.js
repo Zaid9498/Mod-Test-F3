@@ -1,136 +1,126 @@
-window.onload = ()=>{
+const ipDetails = document.getElementById("ip");
 
-    fetch('https://api.ipify.org?format=json')
-.then(response => response.json())
-.then(data => {
-    const ip = data.ip;
-    const useripaddress= document.getElementById('ipaddy');
-    useripaddress.innerHTML=`${ip}`;
-})
-.catch(error=>console.log(error));
+window.onload = ipAddress;
 
-const button = document.getElementById('btn-getstarted');
-button.addEventListener('click',geo);
-
-function geo(){
-    // console.log("geo");
-    fetch('https://api.ipify.org?format=json')
-.then(response => response.json())
-.then(data => {
-    const ip2 = data.ip;
-    // console.log("ipfetch done");
-
-    fetch(`https://ipinfo.io/${ip2}/geo`)
-    .then(response=>response.json())
-    .then(data=>{
-        // console.log(data)
-        const homepage = document.getElementById('homepage');
-        homepage.style.display = 'none';
-        const secondpage = document.getElementById('secondpage');
-        secondpage.style.display='block';
-    
-        const newip = document.getElementById('ipaddy2');
-        // console.log(newip);
-        newip.innerHTML = `${ip2} `;
-        
-        const long = document.getElementById('longspan');
-        const lat = document.getElementById('latspan');
-        const city = document.getElementById('cityspan');
-        const region = document.getElementById('regionspan');
-        const org = document.getElementById('orgspan');
-        const hostname = document.getElementById('hostnamespan');
-        let loc = data.loc.split(",");
-        long.innerHTML=`${loc[1]}`;
-        lat.innerHTML=`${loc[0]}`;
-        city.innerHTML=`${data.city}`;
-        region.innerHTML=`${data.region}`;
-        org.innerHTML=`${data.org}`;
-        hostname.innerHTML=`${data.hostname}`
-
-        const map =document.getElementById('map');
-        map.src=`https://maps.google.com/maps?q=${loc[0]}, ${loc[1]}&z=15&output=embed`;
-        
-
-        const timezone = document.getElementById('timezone');
-        const datetime = document.getElementById('datetime');
-        const pincode = document.getElementById('pincode');
-
-        timezone.innerHTML=`${data.timezone}`;
-        // console.log(data.timezone);
-        let properdatetime = new Date().toLocaleString("en-US",{ timeZone: `${data.timezone}` });
-    //    console.log(properdatetime);
-        datetime.innerHTML=`${properdatetime}`;
-        pincode.innerHTML=`${data.postal};`
-
-        search(data);
-
-
-        function search(data){
-
-
-fetch(`https://api.postalpincode.in/pincode/${data.postal}`)
-.then(response=>response.json())
-.then(office=>{
-
-    const message = document.getElementById('pinfound');
-    //console.log(office[0].Message);
-    message.innerHTML=`${office[0].Message}`;
-    // console.log(office);
-    // console.log(office[0].PostOffice[0]);
-    const searchresult = document.getElementById('searchresult');
-    display(office[0].PostOffice);
-    
-    function display(arr){
-        const results = arr.length;
-        // console.log(results);
-        for(let i=0;i<results;i++){
-
-           const newdiv =  document.createElement('div');
-           newdiv.classList.add('result');
-           newdiv.innerHTML=`<h3>Name : ${arr[i].Name} </h3>
-           <h3>Branch : ${arr[i].BranchType} </h3>
-           <h3>Delivery ${arr[i].DeliveryStatus}</h3>
-           <h3>District : ${arr[i].District}</h3>
-           <h3>Division : ${arr[i].Division}</h3>`
-           searchresult.appendChild(newdiv);
-           
-            
-
-        }
-    }
-})
-.catch(error=>console.log(error));
-  
-
-        }
-        
-        
-    
-    })
-    .catch(error=>console.log(error));
-    
-    
-})
-    .catch(error => console.log(error));
-
-    
+function ipAddress() {
+    fetch(`https://api.ipify.org?format=json`)
+        .then((response) => response.json())
+        .then(data => {
+            showIp(data.ip);
+        })
+        .catch((error) => console.log(error))
+}
+function showIp(ip) {
+    ipDetails.innerHTML = ip;
 }
 
-const searchterm = document.getElementById('search');
-searchterm.addEventListener('input',(e)=>{
-    // const searchQuery=e.target.value.toLowerCase();
-    // const postOfficeList=document.getElementById('searchresult').children;
-    // console.log(postOfficeList);
-    // Array.from(postOfficeList).forEach(item =>{
-    //     const postOfficeName=item.children[0].textContent.split(": ")[1].toLowerCase();
-    //     if(postOfficeName.includes(searchQuery)){
-    //         item.style.display="none";
-    //     }else{
-    //         item.style.display="block";
-    //     }
-    //     console.log(postOfficeName);
-    // });
-    let key = e.target.value;
-     console.log(key);
-});
+// *** Landing page ***
+
+function showDetails() {
+    const IP = ipDetails.innerText;
+    // console.log(IP);
+    setTimeout(() => {
+        fetch(`https://ipapi.co/${IP}/json/`)
+            .then((response) => response.json())
+            .then(data => {
+                showPost(data);
+                // console.log(data.city);
+            })
+            .catch((error) => console.log(error));
+    }, 500);
+}
+
+function getLocation() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(showPosition);
+    } else {
+      alert("Geolocation is not supported by this browser.");
+    }
+  }
+  function showPosition(position) {
+    var lat = position.coords.latitude;
+    var long = position.coords.longitude;
+    document.getElementById("googlemap").src = "https://maps.google.com/maps?q=" + lat + "," + long + "&z=15&output=embed";
+   
+    document.getElementById("lat").innerHTML = lat;
+    document.getElementById("long").innerHTML = long;
+    // console.log(position)
+    // map.setCenter(new google.maps.LatLng(lat, lng));
+  }
+
+function showPost(data) {
+    getLocation();
+    // const lat = data.latitude;
+    // const long = data.longitude;
+    const timezone = data.timezone;
+    const pin = data.postal;
+    const my_time_zone = new Date().toLocaleString("en-US", { timeZone: timezone });
+
+    document.body.classList.add('main');
+    document.body.classList.remove('home');
+
+    document.getElementById("landingIP").innerHTML = data.ip;
+
+    // document.getElementById("lat").innerHTML = lat;
+    // document.getElementById("long").innerHTML = long;
+    document.getElementById("city").innerHTML = data.city;
+    document.getElementById("region").innerHTML = data.region;
+    document.getElementById("org").innerHTML = data.org;
+    document.getElementById("host").innerHTML = data.asn;
+
+    // document.getElementById("googlemap").src = "https://maps.google.com/maps?q=" + lat + "," + long + "&z=15&output=embed";
+    //maps.google.com/maps?q=53.3381768,-6.2613077&z=15&output=embed
+
+    document.getElementById("time").innerHTML = timezone;
+    document.getElementById("date").innerHTML = my_time_zone;
+    document.getElementById("pin").innerHTML = pin;
+
+    postOfficeDetails(pin);
+
+
+}
+
+function postOfficeDetails(pin) {
+    setTimeout(() => {
+        fetch(`https://api.postalpincode.in/pincode/${pin}`)
+            .then((response) => response.json())
+            .then(data => {
+                const postOffice = data[0].PostOffice;
+
+                const cardContainer = document.getElementById("card");
+
+                postOffice.forEach(element => {
+                    cardContainer.innerHTML += `
+                                        <div class="grid-item">
+                                        <p>Name: <span>${element.Name}</span></p>
+                                        <p>Branch Type: <span>${element.BranchType}</span></p>
+                                        <p>Delivery Status: <span>${element.DeliveryStatus}</span></p>
+                                        <p>District: <span>${element.District}</span></p>
+                                        <p>Division: <span>${element.Division}</span></p>
+                                        </div>
+                                        `;
+                });
+
+
+                document.getElementById("noOfPost").innerHTML = data[0].Message;
+
+            })
+            .catch((error) => console.log(error));
+    }, 500);
+}
+
+function searchPost(){
+    var input = document.getElementById("searchBox");
+    var filter = input.value.toUpperCase();
+    var detail = document.getElementById("card");
+    var postData = detail.getElementsByClassName("grid-item");
+    for (i = 0; i < postData.length; i++) {
+        a = postData[i].getElementsByTagName("span")[0];
+        txtValue = a.textContent || a.innerText;
+        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            postData[i].style.display = "";
+        } else {
+            postData[i].style.display = "none";
+        }
+    }
 }
